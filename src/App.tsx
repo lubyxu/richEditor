@@ -1,35 +1,45 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useMemo } from 'react'
+import {
+  createEditor,
+  Descendant,
+} from 'slate'
+import {
+  Slate,
+  Editable,
+  withReact,
+} from 'slate-react';
 
-function App() {
-  const [count, setCount] = useState(0)
+import { renderElement } from './components/Element';
+import { renderLeaf } from './components/Leaf';
+import { onKeyDown } from './helpers/onKeyDown';
 
+const initalValue: Descendant[] = [
+  {
+    type: 'heading',
+    level: 1,
+    children: [
+      {
+        text: ''
+      }
+    ]
+  }
+];
+
+function Editor() {
+  const editor = useMemo(() => {
+    return withReact(createEditor());
+  }, []);
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Slate editor={editor} initialValue={initalValue}>
+      <Editable
+        placeholder="输入内容"
+        className='c-rich-editor mx-auto'
+        renderElement={renderElement}
+        renderLeaf={renderLeaf}
+        onKeyDown={onKeyDown.bind(editor)}
+      />
+    </Slate>
+  );
 }
 
-export default App
+export default Editor;
