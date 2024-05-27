@@ -10,3 +10,11 @@
     margin: 0;
   }
 }
+
+
+each(range(10), {
+  .grid-cols-@{value} {
+    grid-template-columns: repeat(@value, minmax(0, 1fr)) !important;
+  }
+  
+})

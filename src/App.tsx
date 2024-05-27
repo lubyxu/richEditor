@@ -2,6 +2,8 @@ import { useMemo } from 'react'
 import {
   createEditor,
   Descendant,
+  Editor as SlateEditor,
+  Range
 } from 'slate'
 import {
   Slate,
@@ -12,6 +14,10 @@ import {
 import { renderElement } from './components/Element';
 import { renderLeaf } from './components/Leaf';
 import { onKeyDown } from './helpers/onKeyDown';
+import { withCustom } from './hooks/withCustom';
+
+// @ts-ignore
+window.Range = Range;
 
 const initalValue: Descendant[] = [
   {
@@ -19,16 +25,74 @@ const initalValue: Descendant[] = [
     level: 1,
     children: [
       {
-        text: ''
+        text: 'jdjdjd'
+      },
+      {
+        text: 'j1212',
+        bold: 1,
+      },
+      {
+        text: 'ddd'
+      },
+    ]
+  },
+  {
+    type: 'column',
+    children: [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            text: 'column1'
+          },
+          {
+            type: 'link',
+            href: 'https://www.baidu.com',
+            children: [
+              {
+                text: '1212'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            text: 'column2'
+          }
+        ]
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            text: 'column3'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    type: 'paragraph',
+    children: [
+      {
+        text: 'paragraph'
       }
     ]
   }
 ];
 
+// @ts-ignore
+window.SlateEditor = SlateEditor;
+
 function Editor() {
   const editor = useMemo(() => {
-    return withReact(createEditor());
+    return withCustom(withReact(createEditor()));
   }, []);
+  // @ts-ignore
+  window.editor = editor;
   return (
     <Slate editor={editor} initialValue={initalValue}>
       <Editable

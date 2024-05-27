@@ -9,13 +9,13 @@ type IndentFormattedAttribute = { bold?: number; }
 // 段落 | 标题 | 图片 | 无、序列表 | 
 interface ParagraphElement extends BlockFormattedAttribute {
   type: 'paragraph';
-  children: CustomText[];
+  children: (CustomText | LinkElement)[];
 }
 
 interface HeadingElement extends BlockFormattedAttribute {
   type: 'heading';
   level: number;
-  children: CustomText[];
+  children: (CustomText | LinkElement)[];
 };
 
 interface ImageElement extends BlockFormattedAttribute {
@@ -31,7 +31,18 @@ interface ListElement extends BlockFormattedAttribute {
   children: CustomText[];
 }
 
-type CustomElement = ParagraphElement | HeadingElement | ImageElement;
+interface ColumnElement extends BlockFormattedAttribute {
+  type: 'column';
+  children: CustomElement[];
+}
+
+interface LinkElement {
+  type: 'link',
+  href: string;
+  children: CustomText[];
+}
+
+type CustomElement = ParagraphElement | HeadingElement | ImageElement | ColumnElement | LinkElement;
 type CustomText = { text: string; } & IndentFormattedAttribute;
 
 declare module 'slate' {
