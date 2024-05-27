@@ -3,7 +3,8 @@ import {
   createEditor,
   Descendant,
   Editor as SlateEditor,
-  Range
+  Range,
+  Node
 } from 'slate'
 import {
   Slate,
@@ -18,6 +19,8 @@ import { withCustom } from './hooks/withCustom';
 
 // @ts-ignore
 window.Range = Range;
+// @ts-ignore
+window.SlateNode = Node;
 
 const initalValue: Descendant[] = [
   {

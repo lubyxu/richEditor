@@ -1,6 +1,7 @@
 import { Editor, Path, Range, Selection, Transforms, Node as SlateNode, NodeEntry, Point } from "slate";
 import Module from "./module";
 import { CustomElement } from "../vite-env";
+import { Slate } from "slate-react";
 
 const SHORTKEY = /Mac/i.test(navigator.platform) ? 'metaKey' : 'ctrlKey';
 
@@ -126,7 +127,6 @@ export class Keyboard extends Module<KeyboardOptions> {
     const matches = bindings.filter(binding => Keyboard.match(e, binding));
 
     const prevented = matches?.some(match => {
-
       const { node, path, suffix, prefix } = match;
 
     });
@@ -151,32 +151,36 @@ function normalize(binding: Binding): BindingObject | null {
   return binding;
 }
 
-function getMatchNodes(editor: Editor, path: Path) {
+function normalizeRange(range: Range) {
+  const { anchor, focus } = range;
+  const isBackward = Range.isBackward(range);
+  return [
+    isBackward ? focus : anchor,
+    isBackward ? anchor : focus;
+  ]
+}
+
+function getMatchNodes(editor: Editor) {
   const selection = editor.selection;
   if (!selection) return;
-  const ancestors = [...SlateNode.ancestors(editor, path, { reverse: true })];
-  let ancesetorsInContainer: NodeEntry<CustomElement>[] = [];
-  for (let nodeEntry of ancestors) {
-    const [node, path] = nodeEntry;
-    if ('type' in node && node.type === 'column') break;
-    ancesetorsInContainer.push([node as CustomElement, path]);
-  }
 
-  return {
-    line: ancesetorsInContainer[ancesetorsInContainer.length - 1][0],
-    path: ancesetorsInContainer[ancesetorsInContainer.length - 1][1],
-  };
 
-  return ancesetorsInContainer.map(([node, path]) => {
-    const prefix = Editor.string(editor, { anchor: { path, offset: 0 }, focus: selection.anchor });
-    const suffix = Editor.string(editor, { anchor: selection.anchor, focus: Editor.end(editor, path) });
-    return {
-      node,
-      path,
-      prefix,
-      suffix
-    }
+  const [start, end] = normalizeRange(selection);
+  const firstLine = [...SlateNode.ancestors(editor, start.path, { reverse: true })].find(([node]) => {
+    return 'type' in node && ['paragraph', 'heading'].includes(node.type);
   });
 
+  const lastLine = [...SlateNode.ancestors(editor, end.path, { reverse: true })].find(([node]) => {
+    return 'type' in node && ['paragraph', 'heading'].includes(node.type);
+  });
+
+  const prefix = Editor.string(editor, { anchor: { path: firstLine![1], offset: 0 }, focus: start });
+  const suffix = Editor.string(editor, { anchor: end, focus: Editor.end(editor, lastLine![1]) });
+
+  return {
+    line: start,
+    prefix,
+    suffix,
+  };
 }
 
