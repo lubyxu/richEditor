@@ -1,7 +1,6 @@
 import { Editor, Path, Range, Selection, Transforms, Node as SlateNode, NodeEntry, Point } from "slate";
 import Module from "./module";
 import { CustomElement } from "../vite-env";
-import { Slate } from "slate-react";
 
 const SHORTKEY = /Mac/i.test(navigator.platform) ? 'metaKey' : 'ctrlKey';
 
@@ -121,13 +120,20 @@ export class Keyboard extends Module<KeyboardOptions> {
       });
     }
 
-    const matchedNodes = getMatchNodes(this.editor, selection.anchor.path);
+    const curContext = getMatchNodes(this.editor);
     const bindings = (this.bindings[e.key] || []).concat(this.bindings[e.which] || []);
 
     const matches = bindings.filter(binding => Keyboard.match(e, binding));
 
-    const prevented = matches?.some(match => {
-      const { node, path, suffix, prefix } = match;
+    const prevented = matches?.some(binding => {
+      if (binding.prefix && !binding.prefix.test(curContext.prefix)) {
+        return false;
+      }
+      if (binding.suffix && !binding.suffix.test(curContext.suffix)) {
+        return false;
+      }
+
+      return binding.handler?.call(this, curContext);
 
     });
   }
@@ -156,15 +162,12 @@ function normalizeRange(range: Range) {
   const isBackward = Range.isBackward(range);
   return [
     isBackward ? focus : anchor,
-    isBackward ? anchor : focus;
+    isBackward ? anchor : focus,
   ]
 }
 
 function getMatchNodes(editor: Editor) {
-  const selection = editor.selection;
-  if (!selection) return;
-
-
+  const selection = editor.selection!;
   const [start, end] = normalizeRange(selection);
   const firstLine = [...SlateNode.ancestors(editor, start.path, { reverse: true })].find(([node]) => {
     return 'type' in node && ['paragraph', 'heading'].includes(node.type);
@@ -181,6 +184,8 @@ function getMatchNodes(editor: Editor) {
     line: start,
     prefix,
     suffix,
+    empty: !prefix && !suffix && Range.isCollapsed(selection),
+    collapsed: Range.isCollapsed(selection),
   };
 }
 

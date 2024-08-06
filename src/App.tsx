@@ -11,16 +11,24 @@ import {
   Editable,
   withReact,
 } from 'slate-react';
+import 'prismjs/themes/prism.css';
 
 import { renderElement } from './components/Element';
 import { renderLeaf } from './components/Leaf';
 import { onKeyDown } from './helpers/onKeyDown';
 import { withCustom } from './hooks/withCustom';
+import { withRegistry } from './modules/registry';
+import { withShortcuts } from './HOC/withShortcuts';
+import { decorate } from './components/Element/CodeBlock/decorate';
+// import { decorate } from './HOC/withMarkdownDecorate';
+
 
 // @ts-ignore
 window.Range = Range;
 // @ts-ignore
 window.SlateNode = Node;
+// @ts-ignore
+window.SlateEditor = SlateEditor;
 
 const initalValue: Descendant[] = [
   {
@@ -92,18 +100,18 @@ window.SlateEditor = SlateEditor;
 
 function Editor() {
   const editor = useMemo(() => {
-    return withCustom(withReact(createEditor()));
+    return withShortcuts(withReact(createEditor()));
   }, []);
   // @ts-ignore
   window.editor = editor;
   return (
     <Slate editor={editor} initialValue={initalValue}>
       <Editable
+        decorate={(entry) => decorate(entry, editor)}
         placeholder="输入内容"
         className='c-rich-editor mx-auto'
         renderElement={renderElement}
         renderLeaf={renderLeaf}
-        onKeyDown={onKeyDown.bind(editor)}
       />
     </Slate>
   );

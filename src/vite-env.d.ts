@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-import type { BaseEditor } from 'slate';
+import type { BaseEditor, CustomTypes, NodeEntry, Descendant } from 'slate';
 import { ReactEditor } from 'slate-react';
 
 type BlockFormattedAttribute = { indent?: number; };
@@ -28,7 +28,24 @@ interface ImageElement extends BlockFormattedAttribute {
 
 interface ListElement extends BlockFormattedAttribute {
   type: 'list';
-  children: CustomText[];
+  unorder: boolean;
+  no?: number;
+  children: Descendant[];
+}
+
+interface CodeBlockElement {
+  type: 'code-block';
+  children: ParagraphElement[];
+} 
+
+
+export type ListItemElement = { type: 'list-item'; children: Descendant[] }
+
+
+export type BulletedListElement = {
+  type: 'bulleted-list'
+  align?: string
+  children: Descendant[]
 }
 
 interface ColumnElement extends BlockFormattedAttribute {
@@ -42,13 +59,55 @@ interface LinkElement {
   children: CustomText[];
 }
 
-type CustomElement = ParagraphElement | HeadingElement | ImageElement | ColumnElement | LinkElement;
+type CustomElement = ParagraphElement
+  | HeadingElement
+  | ImageElement
+  | ColumnElement
+  | LinkElement
+  | ListElement
+  | BulletedListElement
+  | CodeBlockElement
+  | ListItemElement;
+
 type CustomText = { text: string; } & IndentFormattedAttribute;
+
+
+interface ModuleInterface {
+  editor: CustomTypes['Editor'];
+  onKeyDown(e: React.KeyboardEvent, ctx: IKeyDownContext): void;
+}
+interface Module {
+  new(editor: CustomTypes['Editor'], options: any): ModuleInterface;
+}
+interface CustomEditor {
+  getModule(name: string): ModuleInterface
+}
 
 declare module 'slate' {
   interface CustomTypes {
-    Editor: BaseEditor & ReactEditor;
+    Editor: BaseEditor & ReactEditor & CustomEditor;
     Element: CustomElement;
     Text: CustomText;
   }
+
+}
+
+
+declare interface IKeyDownContext {
+  line: NodeEntry;
+  offset: number;
+  empty: boolean;
+  prefix: string;
+  suffix: string;
+}
+declare interface BindingObject {
+  key: number | string | string[];
+  shortKey?: boolean | null;
+  shiftKey?: boolean | null;
+  altKey?: boolean | null;
+  metaKey?: boolean | null;
+  ctrlKey?: boolean | null;
+  prefix?: RegExp;
+  suffix?: RegExp;
+  handler(this: Editor, context: IContext): boolean | void;
 }
