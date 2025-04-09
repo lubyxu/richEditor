@@ -6,6 +6,7 @@ import { Column } from "./Column/render";
 import { Link } from "./Link/render";
 import { List } from "./List/render";
 import { CodeBlock } from './CodeBlock/render';
+import { Slice } from "./Slice/render";
 
 
 export const renderElement: EditableProps['renderElement'] = function (props) {
@@ -28,6 +29,8 @@ export const renderElement: EditableProps['renderElement'] = function (props) {
       return <List {...props} />
     case 'code-block':
       return <CodeBlock {...props} />;
+    case 'slice':
+      return <Slice {...props} />
     default:
       return <Paragraph {...props} />;
   }

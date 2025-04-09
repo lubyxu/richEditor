@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import {
   createEditor,
   Descendant,
@@ -10,6 +10,7 @@ import {
   Slate,
   Editable,
   withReact,
+  ReactEditor
 } from 'slate-react';
 import 'prismjs/themes/prism.css';
 
@@ -20,6 +21,7 @@ import { withCustom } from './hooks/withCustom';
 import { withRegistry } from './modules/registry';
 import { withShortcuts } from './HOC/withShortcuts';
 import { decorate } from './components/Element/CodeBlock/decorate';
+import { DOMNode } from 'slate-react/dist/utils/dom';
 // import { decorate } from './HOC/withMarkdownDecorate';
 
 
@@ -92,6 +94,35 @@ const initalValue: Descendant[] = [
         text: 'paragraph'
       }
     ]
+  },
+  {
+    type: 'slice',
+    children: [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            text: 'paragraph1'
+          }
+        ]
+      },
+      {
+        type: 'paragraph',
+        children: [
+          {
+            text: 'paragraph2'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    type: 'paragraph',
+    children: [
+      {
+        text: 'paragraph3'
+      }
+    ]
   }
 ];
 
@@ -100,12 +131,21 @@ window.SlateEditor = SlateEditor;
 
 function Editor() {
   const editor = useMemo(() => {
-    return withShortcuts(withReact(createEditor()));
+    const ret = withShortcuts(withReact(createEditor()));
+    return ret;
   }, []);
   // @ts-ignore
   window.editor = editor;
+
   return (
-    <Slate editor={editor} initialValue={initalValue}>
+    <Slate
+      editor={editor}
+      initialValue={initalValue}
+      onChange={e => {
+        const { selection } = editor;
+        console.log('selection :>> ', selection);
+      }}
+    >
       <Editable
         decorate={(entry) => decorate(entry, editor)}
         placeholder="输入内容"

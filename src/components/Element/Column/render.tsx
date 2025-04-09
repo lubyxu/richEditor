@@ -7,6 +7,8 @@ export const Column = function ({ attributes, className, children }: RenderEleme
       {
         children
       }
+
+      <div className={`h-[1px] bg-black col-span-3`}></div>
     </div>
   )
 }

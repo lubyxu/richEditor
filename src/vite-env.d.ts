@@ -53,6 +53,11 @@ interface ColumnElement extends BlockFormattedAttribute {
   children: CustomElement[];
 }
 
+interface SliceElement extends BlockFormattedAttribute {
+  type: 'slice';
+  children: CustomElement[];
+}
+
 interface LinkElement {
   type: 'link',
   href: string;
@@ -60,6 +65,7 @@ interface LinkElement {
 }
 
 type CustomElement = ParagraphElement
+  | SliceElement
   | HeadingElement
   | ImageElement
   | ColumnElement

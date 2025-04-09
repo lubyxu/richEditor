@@ -5,8 +5,6 @@ export const renderLeaf: EditableProps['renderLeaf'] = function ({ attributes, c
   if (leaf.bold) {
     children = <strong>{children}</strong>
   }
-  console.log('attributes :>> ', attributes);
-  console.log('leaf :>> ', leaf);
   let className = attributes.className || '';
   if (leaf.token) {
     const type = leaf.type;
